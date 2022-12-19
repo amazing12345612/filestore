@@ -1,0 +1,40 @@
+version: '3'
+services:
+  mysql-master:
+    image: amd64/mysql:5.7
+    container_name: mysql-master
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_LOG_CONSOLE=true
+      - privileged:true
+    privileged: true
+    volumes:
+      - /Users/cjm/share/filestore/db/master/log:/var/log/mysql
+      - /Users/cjm/share/filestore/db/master/data:/var/lib/mysql
+      - /Users/cjm/share/filestore/db/master/conf:/etc/mysql
+    networks:
+      - mysql-net
+    ports:
+      - "6001:3306"
+
+  mysql-slave:
+    image: amd64/mysql:5.7
+    container_name: mysql-slave
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_LOG_CONSOLE=true
+    privileged: true
+    volumes:
+      - /Users/cjm/share/filestore/db/slave/log:/var/log/mysql
+      - /Users/cjm/share/filestore/db/slave/data:/var/lib/mysql
+      - /Users/cjm/share/filestore/db/slave/conf:/etc/mysql
+    depends_on:
+      - mysql-master
+    networks:
+      - mysql-net
+    ports:
+      - "6601:3306"
+networks:
+  mysql-net:
+
+

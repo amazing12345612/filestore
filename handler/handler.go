@@ -2,6 +2,8 @@ package handler
 
 import (
 	"encoding/json"
+	"filestore/meta"
+	"filestore/util"
 	_ "fmt"
 	"io"
 	"io/ioutil"
@@ -10,9 +12,6 @@ import (
 	"os"
 	"time"
 	_ "time"
-
-	"filestore/meta"
-	// "filestore/util"
 	// "github.com/xilepeng/LeidianNetdisk/util"
 )
 
@@ -32,24 +31,26 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer file.Close()
-
 		fileMeta := meta.FileMeta{
 			FileName: head.Filename,
 			Location: "./tmp/" + head.Filename,
-			FileSize: head.Size,
 			UploadAt: time.Now().Format("2006-01-02 15:04:05"),
 		}
-		newFile, err := os.Create("./tmp" + head.Filename)
+		newFile, err := os.Create(fileMeta.Location)
 		if err != nil {
 			log.Fatal(err)
 			return
 		}
 		defer newFile.Close()
-		_, err = io.Copy(newFile, file)
+
+		fileMeta.FileSize, err = io.Copy(newFile, file)
 		if err != nil {
 			log.Fatal(err)
 			return
 		}
+		newFile.Seek(0, 0)
+		fileMeta.FileSha1 = util.FileSha1(newFile)
+		meta.UpdateFileMetaDB(fileMeta)
 		http.Redirect(w, r, "/file/upload/suc", http.StatusFound)
 	}
 
@@ -66,7 +67,12 @@ func GetFileMetaHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 获取文件的filehash
 	filehash := r.Form["filehash"][0]
-	fMeta := meta.GetFileMeta(filehash)
+	// fMeta := meta.GetFileMeta(filehash)
+	fMeta, err := meta.GetFileMetaDB(filehash)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	data, err := json.Marshal(fMeta) //结构体转换为json
 
