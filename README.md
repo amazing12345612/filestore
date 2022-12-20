@@ -125,3 +125,27 @@ mysql> show databases;
 
 
 ```
+
+## V4.0 基于Hash计算实现秒传 （大幅提升拥有海量文件的云盘性能）
+
+
+```go
+handler/handler.go 实现：
+
+FileQueryHandler : 查询批量的文件元信息
+TryFastUploadHandler : 尝试秒传接口
+DownloadHandler : 文件下载接口
+
+
+db/userfile.go 实现：
+
+QueryUserFileMetas : 批量获取用户文件信息
+
+meta/filemeta.go 实现：
+
+GetLastFileMetas : 获取批量的文件元信息列表
+GetLastFileMetasDB : 批量从mysql获取文件元信息
+
+
+
+```
