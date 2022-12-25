@@ -146,6 +146,40 @@ meta/filemeta.go 实现：
 GetLastFileMetas : 获取批量的文件元信息列表
 GetLastFileMetasDB : 批量从mysql获取文件元信息
 
+```
+分块上传
+
+oot@8d5040d0ee09:/data# redis-cli
+127.0.0.1:6379>
+
+1,查询默认密码
+127.0.0.1:6379>  config get requirepass
+1) "requirepass"
+2) ""
+
+2.修改密码
+127.0.0.1:6379> config set requirepass 123456
+OK
+
+3.查询修改后的密码
+127.0.0.1:6379> config get requirepass
+1) "requirepass"
+2) "123456"
+
+ 4.登录redis
+
+ redis-cli -p 6379 -a 123456
 
 
+
+ 127.0.0.1:6379> auth 123456
+OK
+127.0.0.1:6379> keys *
+(empty array)
+
+## v5.0 异步上传任务
+
+docker创建rabbit
+```
+docker run -d --name rabbit -p 5672:5672 -p 15672:15672 -p 25672:25672 -v ~/rabbit:/var/lib/rabbitmq rabbitmq:1
 ```
