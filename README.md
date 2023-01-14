@@ -183,3 +183,9 @@ docker创建rabbit
 ```
 docker run -d --name rabbit -p 5672:5672 -p 15672:15672 -p 25672:25672 -v ~/rabbit:/var/lib/rabbitmq rabbitmq:1
 ```
+
+v6.0微服务化
+
+protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative service/user/proto/user.proto
+
+protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative service/dbproxy/proto/proxy.proto

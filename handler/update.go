@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"strings"
 	//"filestore-server/store/ceph"
 	cmn "filestore/common"
 	cfg "filestore/config"
@@ -176,28 +177,24 @@ func FileQueryHandler(w http.ResponseWriter, r *http.Request) {
 func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fsha1 := r.Form.Get("filehash")
-	fm := meta.GetFileMeta(fsha1)
-	// TODO：加载已存储到云端（本地）的文件内容，并返回到客户端
+	fm, _ := meta.GetFileMetaDB(fsha1)
+
 	f, err := os.Open(fm.Location)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	// 关闭文件句柄
 	defer f.Close()
 
-	// 将内容读取出来,使用ReadAll方法全部加载到内存里，这里都是小文件，所以可以这么操作，如果是大文件，则需要使用流的方式实现
 	data, err := ioutil.ReadAll(f)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/octect-stream")
 	// attachment表示文件将会提示下载到本地，而不是直接在浏览器中打开
 	w.Header().Set("content-disposition", "attachment; filename=\""+fm.FileName+"\"")
-
-	// w.Header().Set("Content-Type", "application/octect-stream")
-	// w.Header().Set("Content-Descrption", "attachment;filename=\""+fm.FileName+"\"")
 	w.Write(data)
 }
 
@@ -294,4 +291,20 @@ func TryFastUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(resp.JSONBytes())
 	return
+}
+
+// DownloadURLHandler : 生成文件的下载地址
+func DownloadURLHandler(w http.ResponseWriter, r *http.Request) {
+	filehash := r.Form.Get("filehash")
+	// 从文件表查找记录
+	row, _ := dblayer.GetFileMeta(filehash)
+
+	// TODO: 判断文件存在OSS，还是Ceph，还是在本地
+	if strings.HasPrefix(row.FileAddr.String, "./tmp") {
+		username := r.Form.Get("username")
+		token := r.Form.Get("token")
+		tmpUrl := fmt.Sprintf("http://%s/file/download?filehash=%s&username=%s&token=%s",
+			r.Host, filehash, username, token)
+		w.Write([]byte(tmpUrl))
+	}
 }
