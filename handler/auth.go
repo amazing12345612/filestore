@@ -30,6 +30,37 @@ func HTTPInterceptor() gin.HandlerFunc {
 		c.Next()
 	}
 }
+func AuthRequired() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		auth := c.Request.Header.Get("Authorization")
+		if auth == "" {
+			c.Abort()
+			resp := util.NewRespMsg(
+				int(common.StatusTokenInvalid),
+				"token invalid",
+				nil,
+			)
+			c.JSON(http.StatusOK, resp)
+			return
+		}
+		uc, err := util.AnalyzeToken(auth)
+		if err != nil {
+			c.Abort()
+			resp := util.NewRespMsg(
+				int(common.StatusTokenInvalid),
+				"token wrong",
+				nil,
+			)
+			c.JSON(http.StatusOK, resp)
+			return
+		}
+		r.Header.Set("UserId", string(rune(uc.Id)))
+		r.Header.Set("UserIdentity", uc.Identity)
+		r.Header.Set("UserName", uc.Name)
+		c.Next()
+	}
+
+}
 
 // gin jwt 认证中间件
 // func AuthRequired() gin.HandlerFunc {

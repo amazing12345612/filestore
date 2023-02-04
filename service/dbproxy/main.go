@@ -4,16 +4,25 @@ import (
 	dbProxy "filestore/service/dbproxy/proto"
 	dbRpc "filestore/service/dbproxy/rpc"
 	"log"
-	"time"
 
+	"github.com/asim/go-micro/plugins/registry/consul/v3"
 	micro "github.com/asim/go-micro/v3"
+	"github.com/asim/go-micro/v3/registry"
+)
+
+var (
+	ConsulAddr = "127.0.0.1:8500"
+	ServerName = "go.micro.service.dbproxy"
 )
 
 func startRpcService() {
+	reg := consul.NewRegistry(registry.Addrs(ConsulAddr))
 	service := micro.NewService(
-		micro.Name("go.micro.service.dbproxy"), // 在注册中心中的服务名称
-		micro.RegisterTTL(time.Second*10),      // 声明超时时间, 避免consul不主动删掉已失去心跳的服务节点
-		micro.RegisterInterval(time.Second*5),
+		micro.Name(ServerName),
+		micro.Address("0.0.0.0:8001"),
+		// micro.RegisterTTL(time.Second*10),
+		// micro.RegisterInterval(time.Second*5),
+		micro.Registry(reg),
 	)
 	service.Init()
 	dbProxy.RegisterDBProxyServiceHandler(service.Server(), new(dbRpc.DBProxy))

@@ -6,10 +6,12 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 
+	"github.com/asim/go-micro/plugins/registry/consul/v3"
 	"github.com/asim/go-micro/v3"
 
 	"filestore/service/dbproxy/orm"
 	dbProto "filestore/service/dbproxy/proto"
+	"github.com/asim/go-micro/v3/registry"
 )
 
 // FileMeta : 文件元信息结构
@@ -26,10 +28,15 @@ var (
 )
 
 func init() {
-	service := micro.NewService()
-	// 初始化， 解析命令行参数等
+	registry := consul.NewRegistry(
+		registry.Addrs("127.0.0.1:8500"),
+	)
+
+	service := micro.NewService(
+		micro.Registry(registry),
+	)
+
 	service.Init()
-	// 初始化一个dbproxy服务的客户端
 	dbCli = dbProto.NewDBProxyService("go.micro.service.dbproxy", service.Client())
 }
 
