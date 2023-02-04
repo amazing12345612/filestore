@@ -11,4 +11,6 @@ const (
 	TokenExpireDuration = 3600
 	FokenExpireDuration = 10000
 	JwtKey              = "filestore-key"
+	TempLocalRootDir    = "./tmp/"
+	TempPartRootDir     = "./tmp1/"
 )
