@@ -1,7 +1,7 @@
 package route
 
 import (
-	"filestore/handler"
+	// "filestore/handler"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,11 +15,11 @@ func Router() *gin.Engine {
 	router.Static("/static/", "./static")
 
 	// 不需要经过验证就能访问的接口
-	router.GET("/user/signup", handler.SignUpHandler)
-	router.POST("/user/signup", handler.DoSignupHandler)
+	// router.GET("/user/signup", handler.SignUpHandler)
+	// router.POST("/user/signup", handler.DoSignupHandler)
 
-	router.GET("/user/signin", handler.SignInHandler)
-	router.POST("/user/signin", handler.DoSignInHandler)
+	// router.GET("/user/signin", handler.SignInHandler)
+	// router.POST("/user/signin", handler.DoSignInHandler)
 
 	// 加入中间件，用于校验token的拦截器
 	// router.Use(handler.HTTPInterceptor())
