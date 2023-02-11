@@ -8,7 +8,7 @@ import (
 )
 
 func TestMysql(m *testing.T) {
-	db, _ = sql.Open("mysql", "root:makesense@tcp(127.0.0.1:3306)/filestore?charset=utf8")
+	db, _ = sql.Open("mysql", "root:makesense@tcp(127.0.0.1:3306)/fileserver?charset=utf8")
 	db.SetMaxOpenConns(1000)
 	err := db.Ping()
 	if err != nil {

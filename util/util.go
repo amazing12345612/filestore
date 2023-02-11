@@ -4,12 +4,17 @@ import (
 	"crypto/md5"
 	"crypto/sha1"
 	"encoding/hex"
+	"github.com/dgrijalva/jwt-go"
 	"hash"
 	"io"
 	"os"
 	"path/filepath"
 )
-
+type UserClaim struct {
+	Username string
+	Password string
+	jwt.StandardClaims
+}
 // Sha1Stream 定义一个结构体
 type Sha1Stream struct {
 	_sha1 hash.Hash

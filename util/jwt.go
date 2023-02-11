@@ -2,6 +2,7 @@ package util
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -11,31 +12,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UserClaim struct {
-	username string
-	password string
-	jwt.StandardClaims
-}
+
 
 func GenToken2(username, password string) (aToken, rToken string, err error) {
 	calims := UserClaim{
-		username: username,
-		password: password,
+		Username: username,
+		Password: password,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(config.TokenExpireDuration).Unix(), // 过期时间
-			Issuer:    "my-project",                                      // 签发人
+			ExpiresAt: time.Now().Add(time.Second * time.Duration(100)).Unix(), // 过期时间
+			//Issuer:    "my-project",                                      // 签发人
 		},
 	}
 	// 使用指定的签名方法创建签名对象
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, calims)
 	// 生成 aToken
-	aToken, err = token.SignedString(config.JwtKey)
+	aToken, err = token.SignedString([]byte(config.JwtKey))
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	// rToken 不需要存储任何自定义数据
 	rToken, err = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		ExpiresAt: time.Now().Add(config.FokenExpireDuration).Unix(), // 过期时间
-		Issuer:    "my-project",                                      // 签发人
-	}).SignedString(config.JwtKey)
+		ExpiresAt: time.Now().Add(time.Second * time.Duration(200)).Unix(), // 过期时间
+		//Issuer:    "my-project",                                      // 签发人
+	}).SignedString([]byte(config.JwtKey))
 	return aToken, rToken, nil
 }
 
@@ -85,7 +85,7 @@ func RefreshToken(aToken, rToken string) (newToken, newrToken string, err error)
 
 	// 当 access token 是过期错误，并且 refresh token 没有过期就创建一个新的 access token
 	if v.Errors == jwt.ValidationErrorExpired {
-		return GenToken2(claims.username, claims.password)
+		return GenToken2(claims.Username, claims.Password)
 	}
 	return "", "", err
 }
