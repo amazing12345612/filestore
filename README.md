@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+Go文件存储
 # filestore
 =======
 Go文件存储
